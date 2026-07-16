@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SharpPay - Payroll Calculator</title>
+    <style>
+        /******************************
+                RESET
+        ******************************/
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a, #2563eb, #06b6d4);
+            background-size: 400% 400%;
+            animation: bgMove 15s infinite alternate;
+            min-height: 100vh;
+            color: white;
+            padding: 25px;
+        }
+
+        @keyframes bgMove {
+            0% {
+                background-position: left;
+            }
+            100% {
+                background-position: right;
+            }
+        }
+
+        /******************************
+                VARIABLES
+        ******************************/
+        :root {
+            --primary: #3b82f6;
+            --secondary: #06b6d4;
+            --green: #16a34a;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --card: rgba(255, 255, 255, .12);
+            --border: rgba(255, 255, 255, .20);
+        }
+
+        /******************************
+                MAIN CONTAINER
+        ******************************/
+        .container {
+            max-width: 1350px;
+            margin: auto;
+        }
+
+        /******************************
+                TOP BAR
+        ******************************/
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 34px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: #fde047;
+        }
+
+        .language {
+            position: relative;
+        }
+
+        .language button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            background: white;
+            color: #111;
+            font-weight: bold;
+            transition: .3s;
+        }
+
+        .language button:hover {
+            transform: scale(1.05);
+        }
+
+        .language-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 55px;
+            background: white;
+            color: black;
+            border-radius: 12px;
+            overflow: hidden;
+            width: 180px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .3);
+            z-index: 999;
+        }
+
+        .language-menu div {
+            padding: 15px;
+            cursor: pointer;
+            transition: .3s;
+        }
+
+        .language-menu div:hover {
+            background: #2563eb;
+            color: white;
+        }
+
+        .language:hover .language-menu {
+            display: block;
+        }
+
+        /******************************
+                HEADER
+        ******************************/
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header h1 {
+            font-size: 45px;
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            font-size: 20px;
+            opacity: .9;
+        }
+
+        /******************************
+                GRID
+        ******************************/
+        .main {
+            display: grid;
+            grid-template-columns: 420px auto;
+            gap: 30px;
+        }
+
+        @media(max-width:980px) {
+            .main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /******************************
+                CARD
+        ******************************/
+        .card {
+            background: var(--card);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, .25);
+        }
+
+        /******************************
+                INPUTS
+        ******************************/
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            background: white;
+            color: black;
+        }
+
+        input:focus {
+            outline: 3px solid #60a5fa;
+        }
+
+        select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 17px;
+            border: none;
+        }
+
+        /******************************
+                PERIOD BUTTONS
+        ******************************/
+        .periodButtons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .period {
+            padding: 18px;
+            border-radius: 15px;
+            cursor: pointer;
+            background: #1e3a8a;
+            text-align: center;
+            font-size: 18px;
+            transition: .35s;
+            user-select: none;
+        }
+
+        .period:hover {
+            transform: translateY(-4px);
+            background: #2563eb;
+        }
+
+        .period.active {
+            background: #16a34a;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            background: #1e40af;
+            font-size: 16px;
+        }
+
+        /******************************
+                BUTTONS
+        ******************************/
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .buttons button {
+            flex: 1;
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: .3s;
+        }
+
+        .calculate {
+            background: #22c55e;
+            color: white;
+        }
+
+        .calculate:hover {
+            transform: scale(1.04);
+        }
+
+        .reset {
+            background: #ef4444;
+            color: white;
+        }
+
+        .reset:hover {
+            transform: scale(1.04);
+        }
+
+        /********************************
+                RESULT CARDS
+        ********************************/
+        .resultsGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .resultCard {
+            background: rgba(255, 255, 255, .10);
+            border: 1px solid rgba(255, 255, 255, .15);
+            backdrop-filter: blur(12px);
+            padding: 25px;
+            border-radius: 20px;
+            transition: .35s;
+        }
+
+        .resultCard:hover {
+            transform: translateY(-6px);
+        }
+
+        .resultCard h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #fde047;
+        }
+
+        .progress {
+            margin-top: 15px;
+            height: 10px;
+            background: rgba(255, 255, 255, .2);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress div {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #22c55e, #4ade80);
+            transition: 1s;
+        }
+
+        .bigTotal {
+            margin-top: 30px;
+            background: linear-gradient(90deg, #15803d, #22c55e);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .bigTotal h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .bigTotal div {
+            font-size: 42px;
+            font-weight: bold;
+        }
+
+        .warning {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 15px;
+            background: #b91c1c;
+            display: none;
+            font-weight: bold;
+        }
+
+        .country-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 16px;
+            margin-top: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Ocultar recuadros mexicanos en modo neutral */
+        .mexican-only {
+            display: block;
+        }
+
+        .mexican-only.hidden {
+            display: none;
+        }
+
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            opacity: .8;
+            font-size: 15px;
+        }
+
+        /******************************
+                TEST PANEL
+        ******************************/
+        .test-panel {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 2px dashed #fde047;
+        }
+
+        .test-panel .test-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .test-panel .test-buttons button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: .3s;
+            font-size: 14px;
+        }
+
+        .test-panel .test-buttons button:hover {
+            transform: scale(1.05);
+        }
+
+        .test-label {
+            font-weight: bold;
+            color: #fde047;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="topbar">
+            <div class="logo">
+                Sharp<span>Pay</span>
+            </div>
+            <div class="language">
+                <button id="languageButton">
+                    🌎 English ▼
+                </button>
+                <div class="language-menu">
+                    <div onclick="changeLanguage('en')">🏴󠁧󠁢󠁥󠁮󠁧󠁿 English</div>
+                    <div onclick="changeLanguage('es')">🇪🇸 Español</div>
+                    <div onclick="changeLanguage('fr')">🇫🇷 Français</div>
+                    <div onclick="changeLanguage('de')">🇩🇪 Deutsch</div>
+                    <div onclick="changeLanguage('nl')">🇳🇱 Nederlands</div>
+                    <div onclick="changeLanguage('it')">🇮🇹 Italiano</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL DE PRUEBAS -->
+        <div class="test-panel" id="testPanel">
+            <div style="text-align: center; margin-bottom: 10px;">
+                <span class="test-label">🧪 TEST MODE:</span>
+                <span style="font-size: 14px; opacity: 0.8;">(Simulate different countries)</span>
+            </div>
+            <div class="test-buttons">
+                <button onclick="forceCountry('MX')" style="background: #2563eb; color: white;">🇲🇽 Mexico</button>
+                <button onclick="forceCountry('US')" style="background: #22c55e; color: white;">🇺🇸 USA</button>
+                <button onclick="forceCountry('GB')" style="background: #ef4444; color: white;">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</button>
+                <button onclick="forceCountry('CA')" style="background: #dc2626; color: white;">🇨🇦 Canada</button>
+                <button onclick="forceCountry('CA-QC')" style="background: #2563eb; color: white;">🇨🇦 Quebec (FR)</button>
+                <button onclick="forceCountry('DE')" style="background: #f59e0b; color: black;">🇩🇪 Germany</button>
+                <button onclick="forceCountry('CH-DE')" style="background: #f59e0b; color: black;">🇨🇭 Swiss (DE)</button>
+                <button onclick="forceCountry('CH-FR')" style="background: #2563eb; color: white;">🇨🇭 Swiss (FR)</button>
+                <button onclick="forceCountry('CH-IT')" style="background: #16a34a; color: white;">🇨🇭 Swiss (IT)</button>
+                <button onclick="forceCountry('FR')" style="background: #2563eb; color: white;">🇫🇷 France</button>
+                <button onclick="forceCountry('BE')" style="background: #f59e0b; color: black;">🇧🇪 Belgium</button>
+                <button onclick="forceCountry('NL')" style="background: #ef4444; color: white;">🇳🇱 Netherlands</button>
+                <button onclick="forceCountry('IT')" style="background: #16a34a; color: white;">🇮🇹 Italy</button>
+                <button onclick="forceCountry('ES')" style="background: #f59e0b; color: black;">🇪🇸 Spain</button>
+                <button onclick="location.reload()" style="background: #ef4444; color: white;">🔄 Reset</button>
+            </div>
+        </div>
+
+        <div class="header">
+            <h1 id="title">SharpPay - Payroll Calculator</h1>
+            <p id="subtitle">Estimate your payroll quickly and easily.</p>
+            <div class="country-badge" id="countryBadge">🌍 Detected: Global</div>
+        </div>
+
+        <div class="main">
+            <div class="card">
+                <label id="lblHourly">Hourly Wage</label>
+                <input type="number" id="hourly" value="20" min="0">
+
+                <label id="lblHours">Hours Worked Per Day</label>
+                <input type="number" id="hoursPerDay" value="8" min="1" max="24">
+
+                <label id="lblTax">Government Tax %</label>
+                <input type="number" id="tax" value="5" min="0" max="100">
+
+                <label id="lblExtra">Overtime Hours</label>
+                <input type="number" id="overtime" value="0" min="0">
+
+                <label id="lblPeriod">Select Pay Period</label>
+                <div class="periodButtons">
+                    <div class="period active" data-period="7">Weekly</div>
+                    <div class="period" data-period="15">Biweekly</div>
+                    <div class="period" data-period="30">Monthly</div>
+                    <div class="period" data-period="365">Custom Days</div>
+                </div>
+
+                <div class="message" id="periodMessage">Weekly payroll selected. Maximum allowed: 7 worked days.</div>
+
+                <label id="lblDays">Days Worked</label>
+                <input type="number" id="daysWorked" value="5" min="1" max="7">
+
+                <div class="warning" id="warningBox">Invalid number of worked days.</div>
+
+                <div class="buttons">
+                    <button class="calculate" id="calculateButton">Calculate Payroll</button>
+                    <button class="reset" id="resetButton">Reset</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="resultsGrid">
+                    <div class="resultCard">
+                        <h3 id="grossTitle">Gross Pay</h3>
+                        <div class="value" id="gross">$0.00</div>
+                        <div class="progress"><div id="grossBar"></div></div>
+                    </div>
+                    <div class="resultCard mexican-only" id="taxCard">
+                        <h3 id="taxTitle">Income Tax</h3>
+                        <div class="value" id="incomeTax">$0.00</div>
+                        <div class="progress"><div id="taxBar"></div></div>
+                    </div>
+                    <div class="resultCard mexican-only" id="socialCard">
+                        <h3 id="socialTitle">Social Security</h3>
+                        <div class="value" id="socialSecurity">$0.00</div>
+                        <div class="progress"><div id="socialBar"></div></div>
+                    </div>
+                    <div class="resultCard">
+                        <h3 id="govTitle">Government Tax</h3>
+                        <div class="value" id="governmentTax">$0.00</div>
+                        <div class="progress"><div id="governmentBar"></div></div>
+                    </div>
+                    <div class="resultCard mexican-only" id="vacationCard">
+                        <h3 id="vacationTitle">Vacation Pay</h3>
+                        <div class="value" id="vacationPay">$0.00</div>
+                    </div>
+                    <div class="resultCard mexican-only" id="bonusCard">
+                        <h3 id="bonusTitle">Christmas Bonus</h3>
+                        <div class="value" id="bonusPay">$0.00</div>
+                    </div>
+                </div>
+
+                <div class="bigTotal">
+                    <h2 id="netTitle">Estimated Net Pay</h2>
+                    <div id="netPay">$0.00</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>SharpPay © 2026 — Precision in Every Paycheck</footer>
+    </div>
+
+    <script>
+        /*****************************************************************
+                    GLOBAL VARIABLES
+        ******************************************************************/
+        let currentLanguage = "en";
+        let selectedPeriod = 7;
+        let userCountry = "XX";
+        let isMexicanTaxMode = false;
+
+        /*****************************************************************
+                    TRANSLATION DICTIONARY
+        ******************************************************************/
+        const translations = {
+            en: {
+                languageButton: "🌎 English ▼",
+                title: "SharpPay - Payroll Calculator",
+                subtitle: "Estimate your payroll quickly and easily.",
+                hourly: "Hourly Wage",
+                hours: "Hours Worked Per Day",
+                tax: "Government Tax (%)",
+                extra: "Overtime Hours",
+                period: "Select Pay Period",
+                days: "Days Worked",
+                calculate: "Calculate Payroll",
+                reset: "Reset",
+                gross: "Gross Pay",
+                incomeTax: "Income Tax",
+                social: "Social Security",
+                government: "Government Tax",
+                vacation: "Vacation Pay",
+                bonus: "Christmas Bonus",
+                net: "Estimated Net Pay",
+                weekly: "Weekly",
+                biweekly: "Biweekly",
+                monthly: "Monthly",
+                custom: "Custom Days",
+                weekMsg: "Weekly payroll selected. You can enter up to 7 worked days.",
+                biMsg: "Biweekly payroll selected. You can enter up to 15 worked days.",
+                monthMsg: "Monthly payroll selected. You can enter up to 30 worked days.",
+                customMsg: "Custom period selected. You can enter up to 365 worked days.",
+                invalid7: "Weekly payroll only accepts between 1 and 7 worked days.",
+                invalid15: "Biweekly payroll only accepts between 1 and 15 worked days.",
+                invalid30: "Monthly payroll only accepts between 1 and 30 worked days.",
+                invalid365: "Enter a value between 1 and 365 days."
+            },
+            es: {
+                languageButton: "🌎 Español ▼",
+                title: "SharpPay - Calculadora de Nómina",
+                subtitle: "Calcula un aproximado de tu nómina fácilmente.",
+                hourly: "Salario por Hora",
+                hours: "Horas Trabajadas por Día",
+                tax: "Impuesto Gubernamental (%)",
+                extra: "Horas Extra",
+                period: "Seleccione el Período",
+                days: "Días Trabajados",
+                calculate: "Calcular Nómina",
+                reset: "Restablecer",
+                gross: "Salario Bruto",
+                incomeTax: "ISR Aproximado",
+                social: "Seguro Social",
+                government: "Impuesto Gubernamental",
+                vacation: "Vacaciones",
+                bonus: "Aguinaldo",
+                net: "Nómina Neta Estimada",
+                weekly: "Semanal",
+                biweekly: "Quincenal",
+                monthly: "Mensual",
+                custom: "Días Personalizados",
+                weekMsg: "Nómina semanal seleccionada. Puede ingresar hasta 7 días.",
+                biMsg: "Nómina quincenal seleccionada. Puede ingresar hasta 15 días.",
+                monthMsg: "Nómina mensual seleccionada. Puede ingresar hasta 30 días.",
+                customMsg: "Período personalizado. Puede ingresar hasta 365 días.",
+                invalid7: "Solo puede ingresar entre 1 y 7 días.",
+                invalid15: "Solo puede ingresar entre 1 y 15 días.",
+                invalid30: "Solo puede ingresar entre 1 y 30 días.",
+                invalid365: "Ingrese un valor entre 1 y 365 días."
+            },
+            fr: {
+                languageButton: "🌎 Français ▼",
+                title: "SharpPay - Calculateur de Paie",
+                subtitle: "Estimez facilement votre salaire.",
+                hourly: "Salaire Horaire",
+                hours: "Heures Travaillées par Jour",
+                tax: "Taxe Gouvernementale (%)",
+                extra: "Heures Supplémentaires",
+                period: "Choisir la Période",
+                days: "Jours Travaillés",
+                calculate: "Calculer",
+                reset: "Réinitialiser",
+                gross: "Salaire Brut",
+                incomeTax: "Impôt sur le Revenu",
+                social: "Sécurité Sociale",
+                government: "Taxe Gouvernementale",
+                vacation: "Congés Payés",
+                bonus: "Prime de Noël",
+                net: "Salaire Net Estimé",
+                weekly: "Hebdomadaire",
+                biweekly: "Bimensuel",
+                monthly: "Mensuel",
+                custom: "Jours Personnalisés",
+                weekMsg: "Maximum autorisé : 7 jours.",
+                biMsg: "Maximum autorisé : 15 jours.",
+                monthMsg: "Maximum autorisé : 30 jours.",
+                customMsg: "Maximum autorisé : 365 jours.",
+                invalid7: "Seulement de 1 à 7 jours.",
+                invalid15: "Seulement de 1 à 15 jours.",
+                invalid30: "Seulement de 1 à 30 jours.",
+                invalid365: "Entrez entre 1 et 365 jours."
+            },
+            de: {
+                languageButton: "🌎 Deutsch ▼",
+                title: "SharpPay - Lohnrechner",
+                subtitle: "Berechnen Sie Ihren Lohn einfach.",
+                hourly: "Stundenlohn",
+                hours: "Arbeitsstunden pro Tag",
+                tax: "Staatssteuer (%)",
+                extra: "Überstunden",
+                period: "Zeitraum auswählen",
+                days: "Gearbeitete Tage",
+                calculate: "Berechnen",
+                reset: "Zurücksetzen",
+                gross: "Bruttolohn",
+                incomeTax: "Einkommensteuer",
+                social: "Sozialversicherung",
+                government: "Staatssteuer",
+                vacation: "Urlaubsgeld",
+                bonus: "Weihnachtsgeld",
+                net: "Geschätzter Nettolohn",
+                weekly: "Wöchentlich",
+                biweekly: "14-tägig",
+                monthly: "Monatlich",
+                custom: "Benutzerdefiniert",
+                weekMsg: "Maximal 7 Arbeitstage.",
+                biMsg: "Maximal 15 Arbeitstage.",
+                monthMsg: "Maximal 30 Arbeitstage.",
+                customMsg: "Maximal 365 Arbeitstage.",
+                invalid7: "Nur 1 bis 7 Tage erlaubt.",
+                invalid15: "Nur 1 bis 15 Tage erlaubt.",
+                invalid30: "Nur 1 bis 30 Tage erlaubt.",
+                invalid365: "Geben Sie 1 bis 365 Tage ein."
+            },
+            nl: {
+                languageButton: "🌎 Nederlands ▼",
+                title: "SharpPay - Salaris Calculator",
+                subtitle: "Bereken eenvoudig uw salaris.",
+                hourly: "Uurloon",
+                hours: "Gewerkte Uren per Dag",
+                tax: "Overheidsbelasting (%)",
+                extra: "Overuren",
+                period: "Selecteer Periode",
+                days: "Gewerkte Dagen",
+                calculate: "Bereken Salaris",
+                reset: "Reset",
+                gross: "Bruto Salaris",
+                incomeTax: "Inkomstenbelasting",
+                social: "Sociale Zekerheid",
+                government: "Overheidsbelasting",
+                vacation: "Vakantiegeld",
+                bonus: "Kerstbonus",
+                net: "Geschat Netto Salaris",
+                weekly: "Wekelijks",
+                biweekly: "Tweewekelijks",
+                monthly: "Maandelijks",
+                custom: "Aangepaste Dagen",
+                weekMsg: "Maximaal 7 gewerkte dagen.",
+                biMsg: "Maximaal 15 gewerkte dagen.",
+                monthMsg: "Maximaal 30 gewerkte dagen.",
+                customMsg: "Maximaal 365 gewerkte dagen.",
+                invalid7: "Alleen 1 tot 7 dagen toegestaan.",
+                invalid15: "Alleen 1 tot 15 dagen toegestaan.",
+                invalid30: "Alleen 1 tot 30 dagen toegestaan.",
+                invalid365: "Voer een waarde in tussen 1 en 365 dagen."
+            },
+            it: {
+                languageButton: "🌎 Italiano ▼",
+                title: "SharpPay - Calcolo Stipendio",
+                subtitle: "Calcola facilmente il tuo stipendio.",
+                hourly: "Paga Oraria",
+                hours: "Ore Lavorate al Giorno",
+                tax: "Tassa Governativa (%)",
+                extra: "Ore Straordinari",
+                period: "Seleziona Periodo",
+                days: "Giorni Lavorati",
+                calculate: "Calcola Stipendio",
+                reset: "Ripristina",
+                gross: "Stipendio Lordo",
+                incomeTax: "Imposta sul Reddito",
+                social: "Sicurezza Sociale",
+                government: "Tassa Governativa",
+                vacation: "Ferie Pagate",
+                bonus: "Bonus Natalizio",
+                net: "Stipendio Netto Stimato",
+                weekly: "Settimanale",
+                biweekly: "Bisettimanale",
+                monthly: "Mensile",
+                custom: "Giorni Personalizzati",
+                weekMsg: "Massimo 7 giorni lavorativi.",
+                biMsg: "Massimo 15 giorni lavorativi.",
+                monthMsg: "Massimo 30 giorni lavorativi.",
+                customMsg: "Massimo 365 giorni lavorativi.",
+                invalid7: "Solo da 1 a 7 giorni.",
+                invalid15: "Solo da 1 a 15 giorni.",
+                invalid30: "Solo da 1 a 30 giorni.",
+                invalid365: "Inserisci un valore tra 1 e 365 giorni."
+            }
+        };
+
+        /*****************************************************************
+                    FORMATTING HELPERS
+        ******************************************************************/
+        function formatMoney(amount) {
+            return '$' + amount.toFixed(2);
+        }
+
+        function animateBar(id, percentage) {
+            const bar = document.getElementById(id);
+            if (bar) {
+                const capped = Math.min(percentage, 100);
+                setTimeout(() => { bar.style.width = capped + '%'; }, 100);
+            }
+        }
+
+        function selectedPeriodDays() {
+            const active = document.querySelector('.period.active');
+            return active ? parseInt(active.dataset.period) : 7;
+        }
+
+        /*****************************************************************
+                    TOGGLE MEXICAN CARDS
+        ******************************************************************/
+        function toggleMexicanCards(show) {
+            const cards = document.querySelectorAll('.mexican-only');
+            cards.forEach(card => {
+                if (show) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        /*****************************************************************
+                    CHANGE LANGUAGE
+        ******************************************************************/
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            const t = translations[lang];
+            if (!t) return;
+
+            document.getElementById("languageButton").innerHTML = t.languageButton;
+            document.getElementById("title").innerHTML = t.title;
+            document.getElementById("subtitle").innerHTML = t.subtitle;
+            document.getElementById("lblHourly").innerHTML = t.hourly;
+            document.getElementById("lblHours").innerHTML = t.hours;
+            document.getElementById("lblTax").innerHTML = t.tax;
+            document.getElementById("lblExtra").innerHTML = t.extra;
+            document.getElementById("lblPeriod").innerHTML = t.period;
+            document.getElementById("lblDays").innerHTML = t.days;
+            document.getElementById("calculateButton").innerHTML = t.calculate;
+            document.getElementById("resetButton").innerHTML = t.reset;
+            document.getElementById("grossTitle").innerHTML = t.gross;
+            document.getElementById("taxTitle").innerHTML = t.incomeTax;
+            document.getElementById("socialTitle").innerHTML = t.social;
+            document.getElementById("govTitle").innerHTML = t.government;
+            document.getElementById("vacationTitle").innerHTML = t.vacation;
+            document.getElementById("bonusTitle").innerHTML = t.bonus;
+            document.getElementById("netTitle").innerHTML = t.net;
+
+            const periods = document.querySelectorAll(".period");
+            periods[0].innerHTML = t.weekly;
+            periods[1].innerHTML = t.biweekly;
+            periods[2].innerHTML = t.monthly;
+            periods[3].innerHTML = t.custom;
+
+            updatePeriodMessage();
+            validateDays();
+        }
+
+        /*****************************************************************
+                    PERIOD SELECTION
+        ******************************************************************/
+        let maxDays = 7;
+        const daysInput = document.getElementById("daysWorked");
+        const warningBox = document.getElementById("warningBox");
+        const periodMessage = document.getElementById("periodMessage");
+        const calculateButton = document.getElementById("calculateButton");
+
+        document.querySelectorAll(".period").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".period").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                selectedPeriod = Number(btn.dataset.period);
+                maxDays = Number(btn.dataset.period);
+                daysInput.value = 1;
+                daysInput.max = maxDays;
+                updatePeriodMessage();
+                validateDays();
+            });
+        });
+
+        function updatePeriodMessage() {
+            const t = translations[currentLanguage];
+            if (maxDays === 7) periodMessage.innerHTML = t.weekMsg;
+            else if (maxDays === 15) periodMessage.innerHTML = t.biMsg;
+            else if (maxDays === 30) periodMessage.innerHTML = t.monthMsg;
+            else periodMessage.innerHTML = t.customMsg;
+        }
+
+        daysInput.addEventListener("input", validateDays);
+
+        function validateDays() {
+            const value = Number(daysInput.value);
+            const t = translations[currentLanguage];
+            if (value < 1 || value > maxDays || isNaN(value)) {
+                warningBox.style.display = "block";
+                calculateButton.disabled = true;
+                calculateButton.style.opacity = "0.5";
+                if (maxDays === 7) warningBox.innerHTML = t.invalid7;
+                else if (maxDays === 15) warningBox.innerHTML = t.invalid15;
+                else if (maxDays === 30) warningBox.innerHTML = t.invalid30;
+                else warningBox.innerHTML = t.invalid365;
+            } else {
+                warningBox.style.display = "none";
+                calculateButton.disabled = false;
+                calculateButton.style.opacity = "1";
+            }
+        }
+
+        /*****************************************************************
+                    PAYROLL CALCULATION ENGINE
+        ******************************************************************/
+        function calculatePayroll() {
+            const hourly = Number(document.getElementById("hourly").value);
+            const hoursPerDay = Number(document.getElementById("hoursPerDay").value);
+            const taxRate = Number(document.getElementById("tax").value);
+            const overtime = Number(document.getElementById("overtime").value);
+            const days = Number(document.getElementById("daysWorked").value);
+
+            if (isNaN(hourly) || isNaN(hoursPerDay) || isNaN(taxRate) || isNaN(overtime) || isNaN(days)) {
+                alert('Please enter valid numeric values.');
+                return;
+            }
+
+            const dailySalary = hourly * hoursPerDay;
+            const gross = (dailySalary * days) + (overtime * hourly * 1.5);
+
+            // Si el impuesto es 0% → modo CASH (sin descuentos)
+            const isCashMode = (taxRate === 0);
+
+            let incomeTax = 0;
+            let socialSecurity = 0;
+            let governmentTax = 0;
+            let vacationPay = 0;
+            let bonusPay = 0;
+
+            // Solo aplicar impuestos si: taxRate > 0
+            if (!isCashMode) {
+                governmentTax = gross * (taxRate / 100);
+
+                // 🇲🇽 Si es México → aplicar sistema fiscal completo
+                if (isMexicanTaxMode) {
+                    // ISR progresivo
+                    if (gross <= 5000) incomeTax = gross * 0.05;
+                    else if (gross <= 10000) incomeTax = gross * 0.10;
+                    else if (gross <= 20000) incomeTax = gross * 0.15;
+                    else incomeTax = gross * 0.20;
+
+                    socialSecurity = gross * 0.03;
+
+                    const periodDays = selectedPeriodDays();
+                    vacationPay = gross / 30 * (days / periodDays);
+                    bonusPay = gross / 24 * (days / periodDays);
+                }
+            }
+
+            // Mostrar/ocultar tarjetas mexicanas
+            toggleMexicanCards(isMexicanTaxMode && !isCashMode);
+
+            const net = gross - incomeTax - socialSecurity - governmentTax + vacationPay + bonusPay;
+
+            // Actualizar UI
+            document.getElementById("gross").innerText = formatMoney(gross);
+            document.getElementById("incomeTax").innerText = formatMoney(incomeTax);
+            document.getElementById("socialSecurity").innerText = formatMoney(socialSecurity);
+            document.getElementById("governmentTax").innerText = formatMoney(governmentTax);
+            document.getElementById("vacationPay").innerText = formatMoney(vacationPay);
+            document.getElementById("bonusPay").innerText = formatMoney(bonusPay);
+            document.getElementById("netPay").innerText = formatMoney(net);
+
+            // Barras
+            animateBar("grossBar", 100);
+            animateBar("taxBar", gross > 0 ? (incomeTax / gross) * 100 : 0);
+            animateBar("socialBar", gross > 0 ? (socialSecurity / gross) * 100 : 0);
+            animateBar("governmentBar", gross > 0 ? (governmentTax / gross) * 100 : 0);
+        }
+
+        /*****************************************************************
+                    RESET SYSTEM
+        ******************************************************************/
+        function resetAll() {
+            document.getElementById("hourly").value = 20;
+            document.getElementById("hoursPerDay").value = 8;
+            document.getElementById("tax").value = 5;
+            document.getElementById("overtime").value = 0;
+            document.getElementById("daysWorked").value = 1;
+
+            selectedPeriod = 7;
+            maxDays = 7;
+            document.querySelectorAll(".period").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".period")[0].classList.add("active");
+
+            document.getElementById("warningBox").style.display = "none";
+            document.getElementById("calculateButton").disabled = false;
+            document.getElementById("calculateButton").style.opacity = "1";
+
+            ["grossBar", "taxBar", "socialBar", "governmentBar"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.width = "0%";
+            });
+
+            document.getElementById("gross").innerText = "$0.00";
+            document.getElementById("incomeTax").innerText = "$0.00";
+            document.getElementById("socialSecurity").innerText = "$0.00";
+            document.getElementById("governmentTax").innerText = "$0.00";
+            document.getElementById("vacationPay").innerText = "$0.00";
+            document.getElementById("bonusPay").innerText = "$0.00";
+            document.getElementById("netPay").innerText = "$0.00";
+
+            toggleMexicanCards(isMexicanTaxMode);
+        }
+
+        /*****************************************************************
+                    FORCE COUNTRY (TEST MODE)
+        ******************************************************************/
+        function forceCountry(code) {
+            let countryCode = code.toUpperCase();
+            let detectedLang = 'en';
+
+            // Mapeo de países a idiomas
+            const langMap = {
+                'MX': 'es',
+                'ES': 'es',
+                'US': 'en',
+                'GB': 'en',
+                'CA': 'en',
+                'CA-QC': 'fr', // Quebec
+                'DE': 'de',
+                'CH-DE': 'de', // Suiza alemana
+                'CH-FR': 'fr', // Suiza francesa
+                'CH-IT': 'it', // Suiza italiana
+                'FR': 'fr',
+                'BE': 'fr', // Bélgica (francés por defecto)
+                'NL': 'nl',
+                'IT': 'it'
+            };
+
+            // Determinar si es México
+            isMexicanTaxMode = (countryCode === 'MX');
+
+            // Determinar idioma
+            detectedLang = langMap[countryCode] || 'en';
+
+            // Actualizar UI
+            changeLanguage(detectedLang);
+
+            // Actualizar badge
+            const countryNames = {
+                'MX': '🇲🇽 México',
+                'ES': '🇪🇸 España',
+                'US': '🇺🇸 USA',
+                'GB': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',
+                'CA': '🇨🇦 Canada',
+                'CA-QC': '🇨🇦 Quebec (Francophone)',
+                'DE': '🇩🇪 Germany',
+                'CH-DE': '🇨🇭 Switzerland (German)',
+                'CH-FR': '🇨🇭 Switzerland (French)',
+                'CH-IT': '🇨🇭 Switzerland (Italian)',
+                'FR': '🇫🇷 France',
+                'BE': '🇧🇪 Belgium (French)',
+                'NL': '🇳🇱 Netherlands',
+                'IT': '🇮🇹 Italy'
+            };
+
+            const badgeText = countryNames[countryCode] || `🌍 ${countryCode}`;
+            const modeText = isMexicanTaxMode ? ' 🇲🇽 Mexican Tax System' : ' 🌍 International Mode';
+            document.getElementById('countryBadge').innerHTML = `📍 ${badgeText}${modeText}`;
+
+            // Mostrar/ocultar tarjetas mexicanas
+            toggleMexicanCards(isMexicanTaxMode);
+
+            // Resetear resultados
+            resetAll();
+
+            // Mostrar confirmación
+            console.log(`🧪 TEST: Simulando ${badgeText} - Idioma: ${detectedLang} - Modo: ${isMexicanTaxMode ? 'Mexicano' : 'Neutral'}`);
+        }
+
+        /*****************************************************************
+                    DETECT COUNTRY BY IP
+        ******************************************************************/
+        function detectCountryAndLanguage() {
+            // Intentar detectar país por IP
+            fetch('https://ipapi.co/json/')
+                .then(res => {
+                    if (!res.ok) throw new Error('IP API failed');
+                    return res.json();
+                })
+                .then(data => {
+                    userCountry = data.country_code || 'XX';
+                    isMexicanTaxMode = (userCountry === 'MX');
+
+                    // Mostrar badge
+                    const countryNames = {
+                        'MX': '🇲🇽 México',
+                        'ES': '🇪🇸 España',
+                        'US': '🇺🇸 USA',
+                        'GB': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',
+                        'CA': '🇨🇦 Canada',
+                        'AU': '🇦🇺 Australia',
+                        'NZ': '🇳🇿 New Zealand',
+                        'IE': '🇮🇪 Ireland',
+                        'DE': '🇩🇪 Germany',
+                        'AT': '🇦🇹 Austria',
+                        'CH': '🇨🇭 Switzerland',
+                        'FR': '🇫🇷 France',
+                        'BE': '🇧🇪 Belgium',
+                        'NL': '🇳🇱 Netherlands',
+                        'IT': '🇮🇹 Italy'
+                    };
+                    const badgeText = countryNames[userCountry] || `🌍 ${userCountry}`;
+                    const modeText = isMexicanTaxMode ? ' 🇲🇽 Mexican Tax System' : ' 🌍 International Mode';
+                    document.getElementById('countryBadge').innerHTML = `📍 ${badgeText}${modeText}`;
+
+                    // Mostrar/ocultar tarjetas mexicanas
+                    toggleMexicanCards(isMexicanTaxMode);
+
+                    // Asignar idioma según país
+                    const langMap = {
+                        'MX': 'es',
+                        'ES': 'es',
+                        'US': 'en',
+                        'GB': 'en',
+                        'CA': 'en',
+                        'AU': 'en',
+                        'NZ': 'en',
+                        'IE': 'en',
+                        'DE': 'de',
+                        'AT': 'de',
+                        'CH': 'de',
+                        'FR': 'fr',
+                        'BE': 'fr',
+                        'NL': 'nl',
+                        'IT': 'it'
+                    };
+                    const detectedLang = langMap[userCountry] || 'en';
+                    changeLanguage(detectedLang);
+                })
+                .catch(() => {
+                    // Fallback: usar idioma del navegador
+                    document.getElementById('countryBadge').innerHTML = '📍 Browser Default';
+                    const browserLang = navigator.language.substring(0, 2);
+                    const supported = ['en', 'es', 'fr', 'de', 'nl', 'it'];
+                    const lang = supported.includes(browserLang) ? browserLang : 'en';
+                    changeLanguage(lang);
+                    toggleMexicanCards(false);
+                });
+        }
+
+        /*****************************************************************
+                    INIT
+        ******************************************************************/
+        document.getElementById("calculateButton").addEventListener("click", calculatePayroll);
+        document.getElementById("resetButton").addEventListener("click", resetAll);
+
+        // Iniciar app
+        detectCountryAndLanguage();
+        updatePeriodMessage();
+        validateDays();
+    </script>
+</body>
+</html>
